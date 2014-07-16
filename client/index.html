@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	
+	<head>
+		<title>Snake</title>
+		<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+		<link href="./styles.css" rel="stylesheet">
+	</head>
+	<body>
+		<div class="centered" align="center">
+			<img id="logo" src="./logo.png">
+		</div>
+		<div class="container">
+			<div class="row">
+				<label>Username: <input id="username" type="text"></label>
+				<label>GameId: <input type="text" id="game-id"></label>
+				<button class="btn btn-primary" id="create-game">Create game</button>
+				<button class="btn btn-primary" id="join-game">Join game</button>
+			</div>
+		</div>
+		<div class="container">
+		<div class="row">
+			<div class="col-lg-4">
+			<button type="button" class="btn btn-primary" id="start-game">Start game</button>
+			<div class="dropdown " id="difficulty">
+  				<a id="dLabel" role="button" data-toggle="dropdown" data-target="#" class="btn btn-primary">
+    		Choose difficulty <span class="caret"></span>
+  				</a>
+  				<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+    				<li data-difficulty="easy" type="button" class="difficulty">Easy</li>
+    				<li data-difficulty="normal" type="button" class="difficulty">Normal</li>
+    				<li data-difficulty="hard" type="button" class="difficulty">Hard</li>
+ 			 	</ul>
+ 			 	
+		</div>
+		<div id="scores">
+		<p id="current-score"></p>
+		<p id="highscore"></p>
+		</div>
+ 		</div>
+		<div align="center" class="col-lg-8">
+			<canvas id="snakeBoard" width="400" height="400" background="grass.jpg"></canvas>
+		</div>
+		
+		</div>
+		</div>
+		<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+		<script type="text/javascript" src="./app.js"></script>
+		<script	src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+		<script src='bower_components/handlebars/handlebars.min.js'></script>
+		<script src='bower_components/socket.io-client/socket.io.js'></script>
+		<img src="./apple.png" id="food" width="10" height="10">
+		<script type="text/x-handlebars-template" id="current-score-template">
+		<p class="score" id="current-score">Your current-score is: {{score}}<p>
+		</script>
+		<script type="text/x-handlebars-template" id="highscore-template">
+		<p class="score" id="highscore">Current highscore for difficulty {{difficulty}}: {{score}}<p>
+		</script>
+	</body>
+
+</html>
+
+
+

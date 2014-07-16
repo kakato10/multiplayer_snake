@@ -1,0 +1,24 @@
+#logo {
+	width: 40%;
+	height: auto;
+}
+
+#snakeBoard {
+	border: 1px solid;
+}
+
+.score {
+	border: 1px solid green;
+	width:500px;
+	font-size : 20px;
+}
+
+#snakeBoard {
+    background-image: url("./grass.jpg");
+	background-repeat: repeat;    
+}
+
+#food {
+	width: 10px;
+	height: 10px;
+}
