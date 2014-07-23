@@ -3,11 +3,10 @@ var
   app = require('express')(),
   http = require('http').Server(app),
   io = require('socket.io')(http),
-  bodyParser = require("body-parser");
-
-var gameData = {}; // socketId (host) -> gameId
-var gameIdToPlayers = {}; // gameId -> [host, player2]
-var connectedClients = {}; // socketId -> socket
+  bodyParser = require("body-parser"),
+  hostToGameId = {}, // socketId (host) -> gameId
+  gameIdToPlayers = {}, // gameId -> [host, player2]
+  connectedClients = {}; // socketId -> socket
 
 function emitTo(sockets, message, data) {
   sockets.forEach(function(socket) {
@@ -19,28 +18,60 @@ function emitTo(sockets, message, data) {
 }
 
 function socketConnected(socket) {
-  console.log("Socket with id: " + socket.id + " connected");
+  console.log("Socket with id: %s connected", socket.id);
   connectedClients[socket.id] = socket;
 }
 
 function socketDisconected(socketId) {
-  // remove client from the socketId
+  console.log("Socket with id: %s is disconnecting.", socketId);
 
+  var
+    gameId = null,
+    hostId = null;
+
+  // remove client from the socketId
   if(connectedClients[socketId]) {
     delete connectedClients[socketId];
   }
 
-  if(gameData[socketId]) {
-    var gameId = gameData[socketId].gameId;
-    // notify other player
-    delete gameData[socketId];
-    delete gameIdToPlayers[gameId];
-  }
+  Object.keys(gameIdToPlayers).forEach(function(gid) {
+    var
+      players = gameIdToPlayers[gid],
+      target = null,
+      isHost = function(player) {
+        return player.isHost;
+      }
+
+    // first, find the host so we can delete it's record
+    hostId = _.pluck(players.filter(isHost), "socketId").pop();
+    console.log("The host is %s", hostId);
+
+    if(_.contains(_.pluck(players, "socketId"), socketId)) {
+      console.log("Players found in game %s", gid);
+      gameId = gid;
+      if(socketId === players[0].socketId) {
+        target = players[1];
+      } else {
+        target = players[0];
+      }
+
+      // if we have 2 players
+      if(target) {
+        emitTo([target.socketId], "game_disconnected", {});
+      }
+    }
+    return false;
+  });
+
+  delete gameIdToPlayers[gameId];
+  delete hostToGameId[hostId];
 }
 
 // "{playerName}-{5 letters from socketId} - {random number between 1 and 1000}"
 function createGameId(playerName, socketId) {
-  return [playerName.toString(), socketId.substring(0, 5), _.random(1, 1000).toString()].join("-");
+  return [playerName.toString(),
+          socketId.substring(0, 5),
+          _.random(1, 1000).toString()].join("-");
 }
 
 io.on('connection', function(socket){
@@ -80,13 +111,13 @@ app.post("/createGame", function(req, res) {
     gameId = null;
 
     // already hosted a game
-    if(gameData[socketId]) {
-      gameId = gameData[socketId];
+    if(hostToGameId[socketId]) {
+      gameId = hostToGameId[socketId];
     } else {
       // host new game
       gameId = createGameId(playerName, socketId);
 
-      gameData[socketId] = gameId; // we are using it as a set
+      hostToGameId[socketId] = gameId; // we are using it as a set
 
       gameIdToPlayers[gameId] = [{
         playerName: playerName,
@@ -133,7 +164,10 @@ app.post("/joinGame", function(req, res) {
         "error": "This game is not hosted"
       });
     }
+});
 
+app.get("/games", function(req, res) {
+  res.json(gameIdToPlayers);
 });
 
 http.listen(3000, function(){
