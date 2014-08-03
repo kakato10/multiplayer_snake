@@ -1,29 +1,17 @@
-var snakeBoard = document.getElementById("snakeBoard");
-var context = snakeBoard.getContext("2d");
-var snakeBoardHeight = $("#snakeBoard").height();
-var snakeBoardWidth= $("#snakeBoard").width();
-
-var disableButtons = function() {
-  $("#start-game").prop("disabled", true);
-  $("#difficulty").prop("disabled", true);
-};
-
-var enableButtons = function() {
-  $("#start-game").removeAttr("disabled");
-};
-
-var keyCodes  = {
-  37 : "left",
-  38 : "up",
-  39 : "right",
-  40 : "down"
-};
-
-
 $(document).ready(function(){
   //"http://burta.hackbulgaria.com:3000"
   var
     server = "http://127.0.0.1:3000",
+    snakeBoard = document.getElementById("snakeBoard"),
+    context = snakeBoard.getContext("2d"),
+    snakeBoardHeight = $("#snakeBoard").height(),
+    snakeBoardWidth= $("#snakeBoard").width(),
+    keyCodes  = {
+      37 : "left",
+      38 : "up",
+      39 : "right",
+      40 : "down"
+    },
     isHost = false,
     socket = new io(server),
     gameId = "",
@@ -32,6 +20,16 @@ $(document).ready(function(){
     player1,
     player2,
     speed = 400;
+
+  var disableButtons = function() {
+    $("#start-game").prop("disabled", true);
+    $("#difficulty").prop("disabled", true);
+  };
+
+  var enableButtons = function() {
+    $("#start-game").removeAttr("disabled");
+  };
+
 
   var Point = function(xCoord, yCoord, size) {
     this.draw = function(color, image) {
@@ -298,7 +296,7 @@ $(document).ready(function(){
         food: food.getPosition()
       });
   };
-  //drawing snake when you're guest in the game
+
   var drawSnake = function(body, color){
     body.forEach(function(coords){
       var tile = new Point(coords[0], coords[1], 10);
@@ -315,12 +313,9 @@ $(document).ready(function(){
       drawSnake(data.snake1);
       drawSnake(data.snake2, "red");
       var food = new Point(data.food[0], data.food[1], 10);
-      food.draw(document.getElementById("food"));
-      // snake2.draw();
+      food.draw(undefined, document.getElementById("food"));
     }
   });
-
-  //problem somewher over here
 
   socket.on("start", function(data){
     console.log("starteddddddd");
